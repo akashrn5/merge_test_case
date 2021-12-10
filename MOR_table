@@ -1,0 +1,325 @@
+==========================================================================================
+MOR table: 10 batches of merge
+
+Start spark shell with required configuration
+
+spark-shell --master  yarn 
+
+****************************************CDC COde starts here**************
+
+
+Loading the Hudi MOR target table
+******
+
+val srcDS = spark.read.format("csv").option("header", "false").option("delimiter", ",").schema(csvSchema).load("hdfs://xxx/data/")
+
+
+srcDS.write.format("hudi").
+option("hoodie.parquet.small.file.limit", "0").
+option("hoodie.bulkinsert.shuffle.parallelism", "190").
+option("hoodie.insert.shuffle.parallelism", "1").
+option("hoodie.upsert.shuffle.parallelism", "1").
+option("hoodie.parquet.max.file.size", "134217728").
+option("hoodie.parquet.block.size", "134217728").
+option(DataSourceWriteOptions.ASYNC_COMPACT_ENABLE_OPT_KEY, "false").
+option(DataSourceWriteOptions.TABLE_TYPE_OPT_KEY, DataSourceWriteOptions.MOR_TABLE_TYPE_OPT_VAL).
+option("hoodie.compact.inline.max.delta.commits","25").
+option("hoodie.datasource.write.precombine.field", "product_uuid").
+option("hoodie.datasource.write.recordkey.field", "product_uuid").
+option("hoodie.combine.before.upsert", "false").
+option("hoodie.datasource.write.operation", "bulk_insert").
+option("hoodie.datasource.hive_sync.enable", "true").
+option("hoodie.datasource.hive_sync.partition_fields", "").
+option("hoodie.datasource.hive_sync.partition_extractor_class", "org.apache.hudi.hive.NonPartitionedExtractor").
+option("hoodie.datasource.write.keygenerator.class", "org.apache.hudi.keygen.NonpartitionedKeyGenerator").
+option("hoodie.datasource.hive_sync.database", "default").
+option("hoodie.datasource.hive_sync.table", "mor_table39").
+option("hoodie.datasource.hive_sync.jdbcurl", "jdbcconnection_path").
+option("hoodie.table.name","mor_table39").mode(Overwrite).save("hdfs://csvpath/mor_table39")
+
+*********** merge *****************
+import org.apache.spark.sql.types._
+import org.apache.spark.sql._
+import org.apache.hudi.DataSourceWriteOptions
+import org.apache.spark.sql.SaveMode._
+
+val srcDS1 = spark.read.format("csv").option("header", "false").option("delimiter", ",").schema(csvSchema).load("hdfs://csvpath/0")
+val initTime = System.currentTimeMillis()
+srcDS1.write.format("hudi").
+option("hoodie.parquet.small.file.limit", "0").
+option("hoodie.insert.shuffle.parallelism", "1").
+option("hoodie.upsert.shuffle.parallelism", "1").
+option("hoodie.compact.inline.max.delta.commits","25").
+option("hoodie.parquet.max.file.size", "134217728").
+option("hoodie.parquet.block.size", "134217728").
+option(DataSourceWriteOptions.ASYNC_COMPACT_ENABLE_OPT_KEY, "false").
+option(DataSourceWriteOptions.TABLE_TYPE_OPT_KEY, DataSourceWriteOptions.MOR_TABLE_TYPE_OPT_VAL).
+option("hoodie.datasource.write.precombine.field", "product_uuid").
+option("hoodie.datasource.write.recordkey.field", "product_uuid").
+option("hoodie.combine.before.upsert", "false").
+option("hoodie.datasource.write.operation", "upsert").
+option("hoodie.datasource.hive_sync.enable", "true").
+option("hoodie.datasource.hive_sync.partition_fields", "").
+option("hoodie.datasource.hive_sync.partition_extractor_class", "org.apache.hudi.hive.NonPartitionedExtractor").
+option("hoodie.datasource.write.keygenerator.class", "org.apache.hudi.keygen.NonpartitionedKeyGenerator").
+option("hoodie.datasource.hive_sync.database", "default").
+option("hoodie.datasource.hive_sync.table", "mor_table39").
+option("hoodie.datasource.hive_sync.jdbcurl", "jdbcconnection_path").
+option("hoodie.table.name","cow_table").mode(Append).save("hdfs://xx/xx/xx/xx/cow_table")
+
+
+// Thread.sleep(3000)
+val srcDS2 = spark.read.format("csv").option("header", "false").option("delimiter", ",").schema(csvSchema).load("hdfs://csvpath/1")
+val initTime2 = System.currentTimeMillis()
+srcDS2.write.format("hudi").
+option("hoodie.parquet.small.file.limit", "0").
+option("hoodie.insert.shuffle.parallelism", "1").
+option("hoodie.upsert.shuffle.parallelism", "1").
+option("hoodie.compact.inline.max.delta.commits","25").
+option("hoodie.parquet.max.file.size", "134217728").
+option("hoodie.parquet.block.size", "134217728").
+option(DataSourceWriteOptions.ASYNC_COMPACT_ENABLE_OPT_KEY, "false").
+option(DataSourceWriteOptions.TABLE_TYPE_OPT_KEY, DataSourceWriteOptions.MOR_TABLE_TYPE_OPT_VAL).
+option("hoodie.datasource.write.precombine.field", "product_uuid").
+option("hoodie.datasource.write.recordkey.field", "product_uuid").
+option("hoodie.combine.before.upsert", "false").
+option("hoodie.datasource.write.operation", "upsert").
+option("hoodie.datasource.hive_sync.enable", "true").
+option("hoodie.datasource.hive_sync.partition_fields", "").
+option("hoodie.datasource.hive_sync.partition_extractor_class", "org.apache.hudi.hive.NonPartitionedExtractor").
+option("hoodie.datasource.write.keygenerator.class", "org.apache.hudi.keygen.NonpartitionedKeyGenerator").
+option("hoodie.datasource.hive_sync.database", "default").
+option("hoodie.datasource.hive_sync.table", "mor_table39").
+option("hoodie.datasource.hive_sync.jdbcurl", "jdbcconnection_path").
+option("hoodie.table.name","cow_table").mode(Append).save("hdfs://xx/xx/xx/xx/cow_table")
+
+
+
+// Thread.sleep(3000)
+val srcDS3 = spark.read.format("csv").option("header", "false").option("delimiter", ",").schema(csvSchema).load("hdfs://csvpath/2")
+val initTime3 = System.currentTimeMillis()
+srcDS3.write.format("hudi").
+option("hoodie.parquet.small.file.limit", "0").
+option("hoodie.insert.shuffle.parallelism", "1").
+option("hoodie.upsert.shuffle.parallelism", "1").
+option("hoodie.compact.inline.max.delta.commits","25").
+option("hoodie.parquet.max.file.size", "134217728").
+option("hoodie.parquet.block.size", "134217728").
+option(DataSourceWriteOptions.ASYNC_COMPACT_ENABLE_OPT_KEY, "false").
+option(DataSourceWriteOptions.TABLE_TYPE_OPT_KEY, DataSourceWriteOptions.MOR_TABLE_TYPE_OPT_VAL).
+option("hoodie.datasource.write.precombine.field", "product_uuid").
+option("hoodie.datasource.write.recordkey.field", "product_uuid").
+option("hoodie.combine.before.upsert", "false").
+option("hoodie.datasource.write.operation", "upsert").
+option("hoodie.datasource.hive_sync.enable", "true").
+option("hoodie.datasource.hive_sync.partition_fields", "").
+option("hoodie.datasource.hive_sync.partition_extractor_class", "org.apache.hudi.hive.NonPartitionedExtractor").
+option("hoodie.datasource.write.keygenerator.class", "org.apache.hudi.keygen.NonpartitionedKeyGenerator").
+option("hoodie.datasource.hive_sync.database", "default").
+option("hoodie.datasource.hive_sync.table", "mor_table39").
+option("hoodie.datasource.hive_sync.jdbcurl", "jdbcconnection_path").
+option("hoodie.table.name","cow_table").mode(Append).save("hdfs://xx/xx/xx/xx/cow_table")
+
+
+// Thread.sleep(3000)
+val srcDS4 = spark.read.format("csv").option("header", "false").option("delimiter", ",").schema(csvSchema).load("hdfs://csvpath/3")
+val initTime4 = System.currentTimeMillis()
+srcDS4.write.format("hudi").
+option("hoodie.parquet.small.file.limit", "0").
+option("hoodie.insert.shuffle.parallelism", "1").
+option("hoodie.upsert.shuffle.parallelism", "1").
+option("hoodie.compact.inline.max.delta.commits","25").
+option("hoodie.parquet.max.file.size", "134217728").
+option("hoodie.parquet.block.size", "134217728").
+option(DataSourceWriteOptions.ASYNC_COMPACT_ENABLE_OPT_KEY, "false").
+option(DataSourceWriteOptions.TABLE_TYPE_OPT_KEY, DataSourceWriteOptions.MOR_TABLE_TYPE_OPT_VAL).
+option("hoodie.datasource.write.precombine.field", "product_uuid").
+option("hoodie.datasource.write.recordkey.field", "product_uuid").
+option("hoodie.combine.before.upsert", "false").
+option("hoodie.datasource.write.operation", "upsert").
+option("hoodie.datasource.hive_sync.enable", "true").
+option("hoodie.datasource.hive_sync.partition_fields", "").
+option("hoodie.datasource.hive_sync.partition_extractor_class", "org.apache.hudi.hive.NonPartitionedExtractor").
+option("hoodie.datasource.write.keygenerator.class", "org.apache.hudi.keygen.NonpartitionedKeyGenerator").
+option("hoodie.datasource.hive_sync.database", "default").
+option("hoodie.datasource.hive_sync.table", "mor_table39").
+option("hoodie.datasource.hive_sync.jdbcurl", "jdbcconnection_path").
+option("hoodie.table.name","cow_table").mode(Append).save("hdfs://xx/xx/xx/xx/cow_table")
+
+
+// Thread.sleep(3000)
+val srcDS5 = spark.read.format("csv").option("header", "false").option("delimiter", ",").schema(csvSchema).load("hdfs://csvpath/4")
+val initTime5 = System.currentTimeMillis()
+srcDS5.write.format("hudi").
+option("hoodie.parquet.small.file.limit", "0").
+option("hoodie.insert.shuffle.parallelism", "1").
+option("hoodie.upsert.shuffle.parallelism", "1").
+option("hoodie.compact.inline.max.delta.commits","25").
+option("hoodie.parquet.max.file.size", "134217728").
+option("hoodie.parquet.block.size", "134217728").
+option(DataSourceWriteOptions.ASYNC_COMPACT_ENABLE_OPT_KEY, "false").
+option(DataSourceWriteOptions.TABLE_TYPE_OPT_KEY, DataSourceWriteOptions.MOR_TABLE_TYPE_OPT_VAL).
+option("hoodie.datasource.write.precombine.field", "product_uuid").
+option("hoodie.datasource.write.recordkey.field", "product_uuid").
+option("hoodie.combine.before.upsert", "false").
+option("hoodie.datasource.write.operation", "upsert").
+option("hoodie.datasource.hive_sync.enable", "true").
+option("hoodie.datasource.hive_sync.partition_fields", "").
+option("hoodie.datasource.hive_sync.partition_extractor_class", "org.apache.hudi.hive.NonPartitionedExtractor").
+option("hoodie.datasource.write.keygenerator.class", "org.apache.hudi.keygen.NonpartitionedKeyGenerator").
+option("hoodie.datasource.hive_sync.database", "default").
+option("hoodie.datasource.hive_sync.table", "mor_table39").
+option("hoodie.datasource.hive_sync.jdbcurl", "jdbcconnection_path").
+option("hoodie.table.name","cow_table").mode(Append).save("hdfs://xx/xx/xx/xx/cow_table")
+
+
+// Thread.sleep(3000)
+val srcDS6 = spark.read.format("csv").option("header", "false").option("delimiter", ",").schema(csvSchema).load("hdfs://csvpath/5")
+val initTime6 = System.currentTimeMillis()
+srcDS6.write.format("hudi").
+option("hoodie.parquet.small.file.limit", "0").
+option("hoodie.insert.shuffle.parallelism", "1").
+option("hoodie.upsert.shuffle.parallelism", "1").
+option("hoodie.compact.inline.max.delta.commits","25").
+option("hoodie.parquet.max.file.size", "134217728").
+option("hoodie.parquet.block.size", "134217728").
+option(DataSourceWriteOptions.ASYNC_COMPACT_ENABLE_OPT_KEY, "false").
+option(DataSourceWriteOptions.TABLE_TYPE_OPT_KEY, DataSourceWriteOptions.MOR_TABLE_TYPE_OPT_VAL).
+option("hoodie.datasource.write.precombine.field", "product_uuid").
+option("hoodie.datasource.write.recordkey.field", "product_uuid").
+option("hoodie.combine.before.upsert", "false").
+option("hoodie.datasource.write.operation", "upsert").
+option("hoodie.datasource.hive_sync.enable", "true").
+option("hoodie.datasource.hive_sync.partition_fields", "").
+option("hoodie.datasource.hive_sync.partition_extractor_class", "org.apache.hudi.hive.NonPartitionedExtractor").
+option("hoodie.datasource.write.keygenerator.class", "org.apache.hudi.keygen.NonpartitionedKeyGenerator").
+option("hoodie.datasource.hive_sync.database", "default").
+option("hoodie.datasource.hive_sync.table", "mor_table39").
+option("hoodie.datasource.hive_sync.jdbcurl", "jdbcconnection_path").
+option("hoodie.table.name","cow_table").mode(Append).save("hdfs://xx/xx/xx/xx/cow_table")
+
+// Thread.sleep(3000)
+val srcDS7 = spark.read.format("csv").option("header", "false").option("delimiter", ",").schema(csvSchema).load("hdfs://csvpath/6")
+val initTime7 = System.currentTimeMillis()
+srcDS7.write.format("hudi").
+option("hoodie.parquet.small.file.limit", "0").
+option("hoodie.insert.shuffle.parallelism", "1").
+option("hoodie.upsert.shuffle.parallelism", "1").
+option("hoodie.compact.inline.max.delta.commits","25").
+option("hoodie.parquet.max.file.size", "134217728").
+option("hoodie.parquet.block.size", "134217728").
+option(DataSourceWriteOptions.ASYNC_COMPACT_ENABLE_OPT_KEY, "false").
+option(DataSourceWriteOptions.TABLE_TYPE_OPT_KEY, DataSourceWriteOptions.MOR_TABLE_TYPE_OPT_VAL).
+option("hoodie.datasource.write.precombine.field", "product_uuid").
+option("hoodie.datasource.write.recordkey.field", "product_uuid").
+option("hoodie.combine.before.upsert", "false").
+option("hoodie.datasource.write.operation", "upsert").
+option("hoodie.datasource.hive_sync.enable", "true").
+option("hoodie.datasource.hive_sync.partition_fields", "").
+option("hoodie.datasource.hive_sync.partition_extractor_class", "org.apache.hudi.hive.NonPartitionedExtractor").
+option("hoodie.datasource.write.keygenerator.class", "org.apache.hudi.keygen.NonpartitionedKeyGenerator").
+option("hoodie.datasource.hive_sync.database", "default").
+option("hoodie.datasource.hive_sync.table", "mor_table39").
+option("hoodie.datasource.hive_sync.jdbcurl", "jdbcconnection_path").
+option("hoodie.table.name","cow_table").mode(Append).save("hdfs://xx/xx/xx/xx/cow_table")
+
+
+// Thread.sleep(3000)
+val srcDS8 = spark.read.format("csv").option("header", "false").option("delimiter", ",").schema(csvSchema).load("hdfs://csvpath/7")
+val initTime8 = System.currentTimeMillis()
+srcDS8.write.format("hudi").
+option("hoodie.parquet.small.file.limit", "0").
+option("hoodie.insert.shuffle.parallelism", "1").
+option("hoodie.upsert.shuffle.parallelism", "1").
+option("hoodie.compact.inline.max.delta.commits","25").
+option("hoodie.parquet.max.file.size", "134217728").
+option("hoodie.parquet.block.size", "134217728").
+option(DataSourceWriteOptions.ASYNC_COMPACT_ENABLE_OPT_KEY, "false").
+option(DataSourceWriteOptions.TABLE_TYPE_OPT_KEY, DataSourceWriteOptions.MOR_TABLE_TYPE_OPT_VAL).
+option("hoodie.datasource.write.precombine.field", "product_uuid").
+option("hoodie.datasource.write.recordkey.field", "product_uuid").
+option("hoodie.combine.before.upsert", "false").
+option("hoodie.datasource.write.operation", "upsert").
+option("hoodie.datasource.hive_sync.enable", "true").
+option("hoodie.datasource.hive_sync.partition_fields", "").
+option("hoodie.datasource.hive_sync.partition_extractor_class", "org.apache.hudi.hive.NonPartitionedExtractor").
+option("hoodie.datasource.write.keygenerator.class", "org.apache.hudi.keygen.NonpartitionedKeyGenerator").
+option("hoodie.datasource.hive_sync.database", "default").
+option("hoodie.datasource.hive_sync.table", "mor_table39").
+option("hoodie.datasource.hive_sync.jdbcurl", "jdbcconnection_path").
+option("hoodie.table.name","cow_table").mode(Append).save("hdfs://xx/xx/xx/xx/cow_table")
+
+
+// Thread.sleep(3000)
+val srcDS9 = spark.read.format("csv").option("header", "false").option("delimiter", ",").schema(csvSchema).load("hdfs://csvpath/8")
+val initTime9 = System.currentTimeMillis()
+srcDS9.write.format("hudi").
+option("hoodie.parquet.small.file.limit", "0").
+option("hoodie.insert.shuffle.parallelism", "1").
+option("hoodie.upsert.shuffle.parallelism", "1").
+option("hoodie.compact.inline.max.delta.commits","25").
+option("hoodie.parquet.max.file.size", "134217728").
+option("hoodie.parquet.block.size", "134217728").
+option(DataSourceWriteOptions.ASYNC_COMPACT_ENABLE_OPT_KEY, "false").
+option(DataSourceWriteOptions.TABLE_TYPE_OPT_KEY, DataSourceWriteOptions.MOR_TABLE_TYPE_OPT_VAL).
+option("hoodie.datasource.write.precombine.field", "product_uuid").
+option("hoodie.datasource.write.recordkey.field", "product_uuid").
+option("hoodie.combine.before.upsert", "false").
+option("hoodie.datasource.write.operation", "upsert").
+option("hoodie.datasource.hive_sync.enable", "true").
+option("hoodie.datasource.hive_sync.partition_fields", "").
+option("hoodie.datasource.hive_sync.partition_extractor_class", "org.apache.hudi.hive.NonPartitionedExtractor").
+option("hoodie.datasource.write.keygenerator.class", "org.apache.hudi.keygen.NonpartitionedKeyGenerator").
+option("hoodie.datasource.hive_sync.database", "default").
+option("hoodie.datasource.hive_sync.table", "mor_table39").
+option("hoodie.datasource.hive_sync.jdbcurl", "jdbcconnection_path").
+option("hoodie.table.name","cow_table").mode(Append).save("hdfs://xx/xx/xx/xx/cow_table")
+
+
+// Thread.sleep(3000)
+val srcDS10 = spark.read.format("csv").option("header", "false").option("delimiter", ",").schema(csvSchema).load("hdfs://csvpath/9")
+val initTime10 = System.currentTimeMillis()
+srcDS10.write.format("hudi").
+option("hoodie.parquet.small.file.limit", "0").
+option("hoodie.insert.shuffle.parallelism", "1").
+option("hoodie.upsert.shuffle.parallelism", "1").
+option("hoodie.compact.inline.max.delta.commits","25").
+option("hoodie.parquet.max.file.size", "134217728").
+option("hoodie.parquet.block.size", "134217728").
+option(DataSourceWriteOptions.ASYNC_COMPACT_ENABLE_OPT_KEY, "false").
+option(DataSourceWriteOptions.TABLE_TYPE_OPT_KEY, DataSourceWriteOptions.MOR_TABLE_TYPE_OPT_VAL).
+option("hoodie.datasource.write.precombine.field", "product_uuid").
+option("hoodie.datasource.write.recordkey.field", "product_uuid").
+option("hoodie.combine.before.upsert", "false").
+option("hoodie.datasource.write.operation", "upsert").
+option("hoodie.datasource.hive_sync.enable", "true").
+option("hoodie.datasource.hive_sync.partition_fields", "").
+option("hoodie.datasource.hive_sync.partition_extractor_class", "org.apache.hudi.hive.NonPartitionedExtractor").
+option("hoodie.datasource.write.keygenerator.class", "org.apache.hudi.keygen.NonpartitionedKeyGenerator").
+option("hoodie.datasource.hive_sync.database", "default").
+option("hoodie.datasource.hive_sync.table", "mor_table39").
+option("hoodie.datasource.hive_sync.jdbcurl", "jdbcconnection_path").
+option("hoodie.table.name","cow_table").mode(Append).save("hdfs://xx/xx/xx/xx/cow_table")
+
+val finalTime10 = System.currentTimeMillis()
+
+println("total time taken after 10 batches is: " + (finalTime10 - initTime)) 
+
+
+
+
+spark.sql("select count(*) from mor_table39_ro").show()
+
+spark.sql("select count(distinct product_uuid) from mor_table39_ro").show()
+
+spark.sql("select count(*) from mor_table39_ro where product_id='I'").show()
+
+spark.sql("select count(*) from mor_table39_ro where product_id='U'").show()
+
+spark.sql("select count(*) from mor_table39_rt").show()
+
+spark.sql("select count(distinct product_uuid) from mor_table39_rt").show()
+
+spark.sql("select count(*) from mor_table39_rt where product_id='I'").show()
+
+spark.sql("select count(*) from mor_table39_rt where product_id='U'").show()
